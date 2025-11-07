@@ -11,12 +11,345 @@ This is a comprehensive learning project to understand **Retrieval-Augmented Gen
 - **Frontend:** Gradio (web interface)
 - **Vector DB:** ChromaDB (document storage & retrieval)
 - **LLM Provider:** OpenRouter (AI responses)
-- **PDF Processing:** PyPDF2 + pdfplumber
+- **PDF Processing:** pypdf
 - **Embeddings:** Sentence Transformers (local)
 
 ---
 
-## 🏗️ Learning Path (Recommended Order)
+## 🚀 **FAST TRACK: 3-Day Implementation Plan**
+
+**Goal:** Build a fully functional RAG PDF Q&A system in 3 days (6-8 hours/day)
+
+### **Day 1: Core Pipeline (Morning to Evening)**
+
+**Focus:** Get documents in, get answers out - no UI needed yet
+
+**Morning Session (3 hours): PDF Processing + Vector Store**
+1. ✅ Set up environment & validate API keys (30 min)
+2. 🔧 Implement `PDFProcessor.extract_text_from_pdf()` - Use pypdf (1 hour)
+3. 🔧 Implement `PDFProcessor.chunk_text()` - Get chunking working (1 hour)
+4. 🧪 Test with sample PDF, verify chunks have page numbers (30 min)
+
+**Afternoon Session (3-4 hours): Vector Database**
+5. 🔧 Initialize ChromaDB in `VectorStore.__init__()` (30 min)
+6. 🔧 Implement `VectorStore.embed_chunks()` with Sentence Transformers (1 hour)
+7. 🔧 Implement `VectorStore.add_documents()` (45 min)
+8. 🔧 Implement `VectorStore.search()` (1 hour)
+9. 🧪 Test: Add chunks to DB, search with sample query (45 min)
+
+**Evening Session (1-2 hours): LLM Integration**
+10. 🔧 Implement `OpenRouterClient.__init__()` and `validate_api_key()` (30 min)
+11. 🔧 Implement `OpenRouterClient.generate_response()` (45 min)
+12. 🧪 Test: Send test prompt, verify API works (15 min)
+
+**Day 1 Success Criteria:** Can process PDF → store in DB → search → get LLM response (no citations yet)
+
+---
+
+### **Day 2: RAG Pipeline + Citations (Morning to Evening)**
+
+**Focus:** Complete the RAG loop with proper source attribution
+
+**Morning Session (3 hours): RAG Orchestration**
+13. 🔧 Implement `RAGSystem.retrieve_relevant_chunks()` (45 min)
+14. 🔧 Implement `RAGSystem.rank_and_select_context()` (1 hour)
+15. 🔧 Implement `OpenRouterClient.create_rag_prompt()` with citation instructions (1 hour)
+16. 🧪 Test: Full RAG query without citations (15 min)
+
+**Afternoon Session (3 hours): Citation System**
+17. 🔧 Implement `RAGSystem._format_context_with_citations()` (45 min)
+18. 🔧 Implement `RAGSystem._extract_citations()` with regex parsing (1 hour)
+19. 🔧 Implement `RAGSystem.generate_response_with_citations()` (1 hour)
+20. 🧪 Test: Verify citations appear and match source pages (15 min)
+
+**Evening Session (2 hours): Integration + Main App**
+21. 🔧 Uncomment imports in `main.py` (15 min)
+22. 🔧 Implement component initialization in `RAGApplication.initialize_components()` (1 hour)
+23. 🧪 Test: Run `python main.py` without UI, test via Python REPL (45 min)
+
+**Day 2 Success Criteria:** Complete end-to-end RAG pipeline with citations working via code
+
+---
+
+### **Day 3: Gradio UI + Polish (Morning to Evening)**
+
+**Focus:** User interface, error handling, and deployment readiness
+
+**Morning Session (3-4 hours): Gradio Interface**
+24. 📖 Read Gradio docs for chat interfaces (30 min)
+25. 🔧 Implement `GradioInterface._create_interface()` with Blocks API (2 hours)
+26. 🔧 Implement `_handle_file_upload()` - PDF upload and processing (1 hour)
+27. 🔧 Implement `_handle_question()` - Query interface (30 min)
+
+**Afternoon Session (2-3 hours): Polish & Features**
+28. 🔧 Implement `_refresh_system_status()` - Show DB stats (45 min)
+29. 🔧 Add error handling across all modules (1 hour)
+30. 🔧 Implement `RAGApplication._validate_system_health()` (45 min)
+31. 🧪 Test: Upload multiple PDFs, ask diverse questions (30 min)
+
+**Evening Session (1-2 hours): Documentation & Deployment**
+32. 📝 Update README with actual usage instructions (30 min)
+33. 🧪 Test with different PDF types (text-based, complex layouts) (45 min)
+34. 🎉 Demo the system, document any quirks (30 min)
+
+**Day 3 Success Criteria:** Fully functional web UI where anyone can upload PDFs and ask questions
+
+---
+
+## 🏗️ Detailed Implementation Guide by Module
+
+### **Module 1: PDFProcessor** (Day 1 Morning)
+**File:** `src/pdf_processor.py`
+
+**TODOs in order:**
+1. **TODO #1**: Uncomment imports
+   ```python
+   from pypdf import PdfReader  # Note: pypdf, not pypdf2!
+   ```
+
+2. **TODO #5**: Implement `extract_text_from_pdf()`
+   ```python
+   # Use pypdf PdfReader to open PDF
+   # Extract text page by page with page.extract_text()
+   # Return list of {page_number, text, source_file}
+   ```
+
+3. **TODO #6**: Implement `chunk_text()`
+   ```python
+   # Use self.text_splitter (already initialized!)
+   # Create DocumentChunk objects with page numbers
+   ```
+
+4. **TODO #7**: Implement `process_pdf()` (just call #5 then #6)
+
+**Time estimate:** 2.5 hours
+**Testing:** Use a simple 3-5 page PDF to verify chunks contain page numbers
+
+---
+
+### **Module 2: VectorStore** (Day 1 Afternoon)
+**File:** `src/vector_store.py`
+
+**TODOs in order:**
+1. **Uncomment imports:**
+   ```python
+   import chromadb
+   from chromadb.config import Settings
+   from sentence_transformers import SentenceTransformer
+   ```
+
+2. **Implement `__init__()`**: Initialize ChromaDB client and embedding model
+
+3. **Implement `_get_or_create_collection()`**: Set up ChromaDB collection with cosine similarity
+
+4. **Implement `embed_chunks()`**: Generate embeddings using SentenceTransformer
+
+5. **Implement `add_documents()`**: Store chunks with embeddings in ChromaDB
+
+6. **Implement `search()`**: Query embedding → similarity search → return chunks with scores
+
+**Time estimate:** 3.5 hours
+**Testing:** Add 10 chunks, search with query, verify top results make sense
+
+---
+
+### **Module 3: OpenRouterClient** (Day 1 Evening + Day 2)
+**File:** `src/llm_client.py`
+
+**TODOs in order:**
+1. **Uncomment imports:** `from openai import OpenAI`
+
+2. **Implement `__init__()`**: Initialize OpenAI client with OpenRouter base URL
+
+3. **Implement `validate_api_key()`**: Test API connection
+
+4. **Implement `generate_response()`**: Basic LLM call with error handling
+
+5. **Implement `create_rag_prompt()`** (Day 2): Format context + query with citation instructions
+
+6. **Implement `count_tokens()`**: Use tiktoken for token counting
+
+**Time estimate:** 2 hours Day 1, 1 hour Day 2
+**Testing:** Send "Hello" prompt, verify response
+
+---
+
+### **Module 4: RAGSystem** (Day 2 Morning/Afternoon)
+**File:** `src/rag_system.py`
+
+**TODOs in order:**
+1. **Implement `retrieve_relevant_chunks()`**: Call vector_store.search()
+
+2. **Implement `rank_and_select_context()`**: Filter by score, manage token budget
+
+3. **Implement `_format_context_with_citations()`**: Add [Source: file, Page: X] markers
+
+4. **Implement `_extract_citations()`**: Parse citation patterns from LLM response
+
+5. **Implement `generate_response_with_citations()`**: Orchestrate prompt → LLM → citations
+
+6. **Implement `query()`**: Main entry point (already mostly done!)
+
+**Time estimate:** 5 hours
+**Testing:** Full RAG query should return answer with proper citations
+
+---
+
+### **Module 5: GradioInterface** (Day 3 Morning)
+**File:** `src/gradio_ui.py`
+
+**TODOs in order:**
+1. **Read the file first** (it's not examined yet!)
+
+2. **Implement `_create_interface()`**: Use `gr.Blocks()` with tabs
+
+3. **Implement `_handle_file_upload()`**:
+   - Accept PDF files
+   - Call pdf_processor.process_pdf()
+   - Add chunks to vector_store
+
+4. **Implement `_handle_question()`**:
+   - Call rag_system.query()
+   - Format response with citations
+
+5. **Implement `_refresh_system_status()`**: Show collection stats
+
+**Time estimate:** 4 hours
+**Testing:** Upload PDF in browser, ask questions, verify citations display
+
+---
+
+### **Module 6: Main Application** (Day 2 Evening)
+**File:** `main.py`
+
+**TODOs in order:**
+1. **Uncomment imports** at top of file
+
+2. **Implement `initialize_components()`**:
+   - Initialize each component in dependency order
+   - Pass config to constructors
+
+3. **Implement `_validate_system_health()`**: Test connections
+
+4. **Implement `run()`**: Launch Gradio interface
+
+**Time estimate:** 1.5 hours
+**Testing:** `python main.py` should launch web UI
+
+---
+
+## 🧪 Testing Strategy (Throughout 3 Days)
+
+### **Incremental Testing Approach**
+
+After each TODO implementation, test immediately:
+
+**Day 1 Tests:**
+- PDF extraction: `python -c "from src.pdf_processor import PDFProcessor; p = PDFProcessor(); chunks = p.process_pdf('test.pdf'); print(len(chunks))"`
+- Vector storage: Test add then search
+- LLM: Test simple prompt response
+
+**Day 2 Tests:**
+- RAG retrieval: Query should return relevant chunks
+- Citations: Response should include [Source: ..., Page: ...] references
+- End-to-end: Full pipeline without UI
+
+**Day 3 Tests:**
+- UI: Upload PDF, verify processing indicator
+- Q&A: Ask question, verify formatted response
+- Multi-PDF: Test with 3+ documents
+
+### **Sample Test Queries**
+
+Use these to verify your system:
+1. "What are the main topics discussed?" (broad query)
+2. "What is mentioned on page 5?" (page-specific)
+3. "Who is the author of this document?" (metadata query)
+4. "Summarize the conclusions" (section-specific)
+
+---
+
+## ⚡ Quick Reference: Critical Code Snippets
+
+### **ChromaDB Setup**
+```python
+import chromadb
+from chromadb.config import Settings
+
+self.chroma_client = chromadb.PersistentClient(
+    path=persist_directory,
+    settings=Settings(allow_reset=True)
+)
+self.collection = self.chroma_client.get_or_create_collection(
+    name=collection_name,
+    metadata={"hnsw:space": "cosine"}
+)
+```
+
+### **Embedding Generation**
+```python
+from sentence_transformers import SentenceTransformer
+
+self.embedding_model = SentenceTransformer(embedding_model)
+texts = [chunk.content for chunk in chunks]
+embeddings = self.embedding_model.encode(
+    texts,
+    batch_size=32,
+    normalize_embeddings=True
+)
+```
+
+### **OpenRouter Client**
+```python
+from openai import OpenAI
+
+self.client = OpenAI(
+    api_key=api_key,
+    base_url=base_url  # "https://openrouter.ai/api/v1"
+)
+response = self.client.chat.completions.create(
+    model=self.default_model,
+    messages=[{"role": "user", "content": prompt}]
+)
+```
+
+### **RAG Prompt Template**
+```python
+prompt = f"""Based on the following context from documents, answer the question.
+Include citations using the format [Source: filename, Page: X].
+
+Context:
+{formatted_context}
+
+Question: {query}
+
+Answer with citations:"""
+```
+
+---
+
+## 🎯 Success Milestones
+
+**End of Day 1:** ✅ Core pipeline works without UI
+- Can load PDF programmatically
+- Chunks stored in ChromaDB
+- Can retrieve similar chunks
+- LLM responds to prompts
+
+**End of Day 2:** ✅ Full RAG system with citations
+- RAG query returns answers with sources
+- Citations include page numbers
+- Can test via Python REPL
+
+**End of Day 3:** ✅ Production-ready web app
+- Gradio UI is polished and functional
+- Multiple users can upload PDFs
+- Error handling prevents crashes
+- System is ready to demo
+
+---
+
+## 🏗️ Original Learning Path (8-Week Deep Dive)
 
 ### **Phase 1: Foundation Concepts (Week 1-2)**
 
@@ -87,14 +420,14 @@ Learn how to extract and prepare text for vector storage.
 **Concepts to learn:**
 
 - Different PDF types (text vs scanned)
-- Extraction library trade-offs (PyPDF2, pdfplumber, pymupdf)
-- Handling complex layouts and formatting
+- Using pypdf for text extraction
+- Handling extraction errors and edge cases
 
 **Resources:**
 
-- [PyPDF2 Documentation](https://pypdf2.readthedocs.io/)
-- [pdfplumber Examples](https://github.com/jsvine/pdfplumber)
+- [pypdf Documentation](https://pypdf.readthedocs.io/)
 - **Hands-on:** Extract text from different PDF types
+- **Note:** For complex layouts (tables, forms), consider adding pdfplumber later
 
 **Implementation Tasks:**
 
@@ -431,9 +764,9 @@ Create an intuitive interface for your RAG system.
 
 #### **PDF Processing Problems**
 
-- **Encrypted PDFs:** Use `pypdf2` password parameter or `unstructured` library
-- **Scanned PDFs:** Consider OCR with `pytesseract`
-- **Complex layouts:** Try `pdfplumber` or `pymupdf` for better extraction
+- **Encrypted PDFs:** Use pypdf's password parameter or check file permissions
+- **Scanned PDFs:** Consider OCR with `pytesseract` (requires separate implementation)
+- **Complex layouts:** Consider adding `pdfplumber` for tables/forms if needed
 - **Large files:** Implement streaming or chunked processing
 
 #### **Embedding Issues**

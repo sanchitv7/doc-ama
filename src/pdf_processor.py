@@ -3,7 +3,7 @@ PDF Processing Module for RAG System
 
 This module handles PDF parsing, text extraction, and document chunking.
 Key concepts to learn:
-- Text extraction from PDFs (PyPDF2 vs pdfplumber differences)
+- Text extraction from PDFs using pypdf
 - Document chunking strategies (fixed-size vs semantic)
 - Text preprocessing and cleaning
 - Metadata preservation for citations
@@ -15,8 +15,7 @@ from dataclasses import dataclass
 import logging
 
 # TODO #1: Uncomment these imports as you implement each component
-# from pypdf2 import PdfReader
-# from pdfplumber import PDF
+# from pypdf import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 # import tiktoken
 
@@ -42,7 +41,7 @@ class PDFProcessor:
     Handles PDF document processing and text chunking.
 
     Learning objectives:
-    1. Understand different PDF parsing libraries and their use cases
+    1. Understand PDF text extraction using pypdf
     2. Learn about text chunking strategies for RAG systems
     3. Implement citation-friendly metadata preservation
     """
@@ -73,9 +72,7 @@ class PDFProcessor:
 
         TODO #5: Implement text extraction logic
         Learning resources:
-        - PyPDF2 documentation: https://pypdf2.readthedocs.io/
-        - pdfplumber for complex layouts: https://github.com/jsvine/pdfplumber
-        - Compare extraction quality between libraries
+        - pypdf documentation: https://pypdf.readthedocs.io/
 
         Args:
             pdf_path: Path to the PDF file
@@ -85,11 +82,13 @@ class PDFProcessor:
 
         TODO #5 Implementation steps:
         1. Validate PDF file exists and is readable
-        2. Try PyPDF2 first for simple extraction
-        3. Fallback to pdfplumber for complex layouts
-        4. Extract text page by page
-        5. Preserve page numbers and other metadata
-        6. Handle extraction errors gracefully
+        2. Use pypdf PdfReader to open the PDF
+        3. Extract text page by page using page.extract_text()
+        4. Preserve page numbers and other metadata
+        5. Handle extraction errors gracefully
+
+        Note: If you encounter complex PDFs with poor extraction quality,
+        consider adding pdfplumber as a fallback library later.
         """
         pages = []
 
