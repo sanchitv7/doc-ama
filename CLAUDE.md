@@ -19,7 +19,7 @@ User → Gradio UI → RAG System → {Vector Store, LLM Client} → Response wi
 ### Core Components
 
 1. **PDF Processor** ([src/pdf_processor.py](src/pdf_processor.py))
-   - Extracts text from PDF files (PyPDF2/pdfplumber)
+   - Extracts text from PDF files (pypdf)
    - Chunks text for embedding (using LangChain text splitters)
    - Preserves metadata for citations (page numbers, source files)
    - **Status:** TODOs #1-9 not implemented
@@ -58,7 +58,7 @@ User → Gradio UI → RAG System → {Vector Store, LLM Client} → Response wi
 - **Vector DB:** ChromaDB 0.4+ (persistent storage)
 - **Embeddings:** Sentence Transformers (local, no API)
 - **LLM:** OpenRouter API (multi-model proxy)
-- **PDF Processing:** PyPDF2 + pdfplumber + LangChain
+- **PDF Processing:** pypdf + LangChain
 - **Python:** 3.13+
 
 ## Configuration
@@ -144,7 +144,7 @@ doc-ama/
 **To add PDF processing:**
 1. Implement `PDFProcessor.extract_text_from_pdf()` (TODO #5)
 2. Implement `PDFProcessor.chunk_text()` (TODO #6)
-3. Uncomment imports: PyPDF2, pdfplumber, RecursiveCharacterTextSplitter
+3. Uncomment imports: pypdf PdfReader, RecursiveCharacterTextSplitter
 
 **To enable vector search:**
 1. Initialize ChromaDB client in `VectorStore.__init__`
@@ -249,8 +249,7 @@ See [LEARNING_PLAN.md](LEARNING_PLAN.md) for detailed sprint breakdown.
 - chromadb >= 0.4.0 ✓
 - openai >= 1.0.0 ✓ (OpenRouter compatible)
 - sentence-transformers >= 2.2.0 ✓
-- pypdf2 >= 3.0.0 ✓
-- pdfplumber >= 0.9.0 ✓
+- pypdf >= 3.0.0 ✓
 - langchain >= 0.1.0 ✓
 - tiktoken >= 0.5.0 ✓
 
@@ -267,8 +266,9 @@ pip install -r requirements.txt
 
 **If PDF extraction fails:**
 - Check file is not encrypted/password-protected
-- Try pdfplumber if PyPDF2 fails
 - Verify file path is absolute
+- Check PDF is text-based (not scanned)
+- Consider adding pdfplumber for complex layouts if needed
 
 **If embeddings fail:**
 - Check ChromaDB persist directory is writable
